@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --success-color: #34C759;
+            --danger-color: #FF3B30;
+            --bg-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: var(--bg-gradient);
+            color: white;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px 60px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .header {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+        }
+
+        .timer-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .time-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 70px;
+        }
+
+        .num {
+            font-size: 48px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums; /* 防止数字跳动 */
+            text-shadow: 0 0 20px rgba(0, 122, 255, 0.5);
+        }
+
+        .unit {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 5px;
+        }
+
+        /* 进度条设计 */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #007AFF, #00C7FF);
+            transition: width 1s linear;
+            box-shadow: 0 0 10px rgba(0, 122, 255, 0.8);
+        }
+
+        /* 已下班状态 */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 20px;
+            background: rgba(52, 199, 89, 0.2);
+            color: var(--success-color);
+            border: 1px solid rgba(52, 199, 89, 0.3);
+        }
+
+        .off-duty .num { color: var(--success-color); text-shadow: none; }
+        .off-duty .progress-bar { background: var(--success-color); }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="card">
+        <div class="header" id="title">距离订单 16:00 截止还有</div>
+        
+        <div class="timer-display">
+            <div class="time-block">
+                <div class="num" id="h">00</div>
+                <div class="unit">HOURS</div>
+            </div>
+            <div class="time-block">
+                <div class="num" id="m">00</div>
+                <div class="unit">MINS</div>
+            </div>
+            <div class="time-block">
+                <div class="num" id="s">00</div>
+                <div class="unit">SECS</div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="bar"></div>
+        </div>
+
+        <div id="status" class="status-badge" style="display: none;">已开启下班模式</div>
+    </div>
+
+    <script>
+        function update() {
+            const now = new Date();
+            const target = new Date();
+            target.setHours(16, 0, 0, 0);
+
+            // 假设工作日从早上 9:00 开始计算进度
+            const start = new Date();
+            start.setHours(9, 0, 0, 0);
+
+            const diff = target - now;
+            const totalWorkTime = target - start;
+
+            if (diff <= 0) {
+                document.getElementById('title').innerText = "Working Day Ended";
+                document.getElementById('h').innerText = "OFF";
+                document.getElementById('m').innerText = "DU";
+                document.getElementById('s').innerText = "TY";
+                document.getElementById('bar').style.width = "100%";
+                document.getElementById('status').style.display = "inline-block";
+                document.getElementById('card').classList.add('off-duty');
+                return;
+            }
+
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+
+            document.getElementById('h').innerText = h.toString().padStart(2, '0');
+            document.getElementById('m').innerText = m.toString().padStart(2, '0');
+            document.getElementById('s').innerText = s.toString().padStart(2, '0');
+
+            // 计算百分比进度
+            const progress = Math.min(100, Math.max(0, ((now - start) / totalWorkTime) * 100));
+            document.getElementById('bar').style.width = progress + "%";
+        }
+
+        setInterval(update, 1000);
+        update();
+    </script>
+</body>
+</html>
