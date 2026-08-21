@@ -185,14 +185,17 @@ function drawSoundWave(now) {
   resizeSoundWave();
   const width = window.innerWidth;
   const height = window.innerHeight;
+  const portraitMobile = window.matchMedia("(max-width: 700px) and (orientation: portrait)").matches;
   const centerX = width / 2;
   const playerHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--player-h")) || 80;
-  const centerY = height + playerHeight * .88;
-  const minimumRadius = Math.min(width, height) * .28;
-  const maximumRadius = Math.hypot(width * .62, height * 1.08);
+  const centerY = height + playerHeight * (portraitMobile ? .72 : .88);
+  const minimumRadius = Math.min(width, height) * (portraitMobile ? .24 : .28);
+  const maximumRadius = portraitMobile
+    ? Math.hypot(width * .82, height * 1.14)
+    : Math.hypot(width * .62, height * 1.08);
   const energy = waveEnergy();
   const elapsed = now - waveStartedAt;
-  const cycle = 34000;
+  const cycle = portraitMobile ? 68000 : 34000;
   const rgb = tracks[currentTrack].rgb.split(",").map(Number);
   const points = Math.max(150, Math.round(width / 7));
 
@@ -205,7 +208,7 @@ function drawSoundWave(now) {
     const easedPhase = phase * phase * (3 - 2 * phase);
     const radius = minimumRadius + (maximumRadius - minimumRadius) * easedPhase;
     const fade = Math.pow(Math.sin(Math.PI * phase), 1.15);
-    const amplitude = (13 + energy * 44) * (1 - phase * .18);
+    const amplitude = (13 + energy * 44) * (1 - phase * .18) * (portraitMobile ? .78 : 1);
     const alpha = fade * (.042 + energy * .095);
 
     waveContext.beginPath();
