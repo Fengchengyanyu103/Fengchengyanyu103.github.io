@@ -192,7 +192,7 @@ function drawSoundWave(now) {
   const maximumRadius = Math.hypot(width * .62, height * 1.08);
   const energy = waveEnergy();
   const elapsed = now - waveStartedAt;
-  const cycle = 24000;
+  const cycle = 34000;
   const rgb = tracks[currentTrack].rgb.split(",").map(Number);
   const points = Math.max(150, Math.round(width / 7));
 
@@ -200,13 +200,13 @@ function drawSoundWave(now) {
   waveContext.lineCap = "round";
   waveContext.lineJoin = "round";
 
-  for (let layer = 0; layer < 7; layer += 1) {
-    const phase = ((elapsed / cycle) + layer / 7) % 1;
+  for (let layer = 0; layer < 5; layer += 1) {
+    const phase = ((elapsed / cycle) + layer / 5) % 1;
     const easedPhase = phase * phase * (3 - 2 * phase);
     const radius = minimumRadius + (maximumRadius - minimumRadius) * easedPhase;
     const fade = Math.pow(Math.sin(Math.PI * phase), 1.15);
     const amplitude = (13 + energy * 44) * (1 - phase * .18);
-    const alpha = fade * (.055 + energy * .13);
+    const alpha = fade * (.042 + energy * .095);
 
     waveContext.beginPath();
     for (let point = 0; point <= points; point += 1) {
@@ -223,9 +223,9 @@ function drawSoundWave(now) {
       else waveContext.lineTo(x, y);
     }
     waveContext.strokeStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
-    waveContext.lineWidth = .58 + energy * .62;
-    waveContext.shadowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha * .62})`;
-    waveContext.shadowBlur = 3 + energy * 6;
+    waveContext.lineWidth = .5 + energy * .45;
+    waveContext.shadowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha * .48})`;
+    waveContext.shadowBlur = 2 + energy * 4;
     waveContext.stroke();
   }
 
@@ -350,7 +350,7 @@ async function playAudio() {
   try {
     await audio.play();
   } catch (error) {
-    showToast("浏览器暂时无法播放该音频，请再次点击播放或使用本地服务器打开。 ");
+    showToast("音乐加载中；请稍等");
     syncPlaybackUI();
   }
 }
@@ -456,7 +456,7 @@ audio.addEventListener("timeupdate", () => {
 audio.addEventListener("error", () => {
   // Switching tracks intentionally aborts the previous request; this is not a user-facing error.
   if (!audio.error || audio.error.code === MediaError.MEDIA_ERR_ABORTED) return;
-  showToast(`《${tracks[currentTrack].title}》加载失败，请确认音频文件仍位于 assets/audio。`);
+  showToast("音乐加载中；请稍等");
 });
 
 function setMenu(open, restoreFocus = true) {
